@@ -63,9 +63,9 @@ public class PhotoOrganizer extends Application {
         
         primaryStage.setScene(scene);
         primaryStage.setTitle(currentLocation.getName());
-
-        primaryStage.setMinHeight(600);
-        primaryStage.setMinWidth(850);
+        
+        primaryStage.setMinHeight(689);
+        primaryStage.setMinWidth(903);
 
         primaryStage.show();
         
@@ -121,6 +121,7 @@ public class PhotoOrganizer extends Application {
         textField.setPromptText("Search...");
         
         hBoxSearch.setPrefWidth(800);
+        textField.setPrefWidth(300);
         hBoxSearch.setAlignment(Pos.CENTER_RIGHT);
         HBox.setHgrow(hBoxSearch, Priority.ALWAYS);
         hBoxSearch.getChildren().addAll(textField);
@@ -195,6 +196,7 @@ public class PhotoOrganizer extends Application {
                 hBoxTree.getChildren().addAll(imageView, text);
                 
                 vBoxTree.getChildren().add(hBoxTree);
+                vBoxTree.setPrefHeight(600);
                 
             }
         };
@@ -278,37 +280,71 @@ public class PhotoOrganizer extends Application {
 
                                 rightFrame = new VBox();
                                 try {
+                                    File fileRight = new File(path.getDirectoryPath());
+                                    Text textRight = new Text(fileRight.getName());
+                                    
+                                    Image imageRight = new Image(new FileInputStream(path.getDirectoryPath()));
+                                    ImageView imageViewRight = new ImageView(imageRight);
+                                    imageViewRight.setFitHeight(300);
+                                    imageViewRight.setFitWidth(300);
+                                    
                                     Slider slider = new Slider();
                                     slider.setMin(1);
                                     slider.setMax(2);
                                     slider.setOnMouseReleased(events -> {
                                         size = slider.getValue();
                                         System.out.println("slider: " + slider.getValue());
+                                        imageViewRight.setFitHeight(300 * size);
+                                        imageViewRight.setFitWidth(300 * size);
                                         try {
                                             restart(stage);
-                                            //System.out.println("TEST RELOAD");
                                         } catch (IOException ex) {
                                             Logger.getLogger(PhotoOrganizer.class.getName()).log(Level.SEVERE, null, ex);
                                         }
                                     });
                                     
-                                    Text textRight = new Text(currentLocation.listFiles()[1].getAbsolutePath());
-                                    Image imageRight = new Image(new FileInputStream(path.getDirectoryPath()));
-                                    ImageView imageViewRight = new ImageView(imageRight);
-                                    imageViewRight.setFitHeight(250 * size);
-                                    imageViewRight.setFitWidth(250 * size);
-                                    
                                     ScrollPane scrollZoom = new ScrollPane();
                                     scrollZoom.setFitToHeight(true);
                                     scrollZoom.setFitToWidth(true);
-                                    scrollZoom.setPrefViewportHeight(250);
-                                    scrollZoom.setPrefViewportWidth(250);
+                                    scrollZoom.setPrefViewportHeight(300);
+                                    scrollZoom.setPrefViewportWidth(300);
                                     scrollZoom.setContent(imageViewRight);
+                                    
+                                    HBox hBoxName = new HBox();
+                                    Text name = new Text("name: ");
+                                    name.setStyle("-fx-font-weight: bold;");
+                                    
+                                    HBox hBoxDate = new HBox();
+                                    Text date = new Text("last modified: ");
+                                    date.setStyle("-fx-font-weight: bold;");
+                                    
+                                    HBox hBoxType = new HBox();
                                     
                                     SimpleDateFormat df = new SimpleDateFormat("MM/dd/yyyy");
                                     File fileName = new File(currentLocation.getAbsolutePath());
                                     Text imageLastMod = new Text(df.format(fileName.lastModified()));
-                                    rightFrame.getChildren().addAll(scrollZoom, slider, textRight, imageLastMod);
+                                    
+                                    hBoxName.getChildren().addAll(name, textRight);
+                                    hBoxName.setAlignment(Pos.CENTER);
+                                    hBoxDate.getChildren().addAll(date, imageLastMod);
+                                    hBoxDate.setAlignment(Pos.CENTER);
+                                    
+                                    if (fileRight.getName().endsWith(".jpg")) {
+                                        Text type = new Text("type: ");
+                                        type.setStyle("-fx-font-weight: bold;");
+                                        Text detail = new Text (".jpg");
+                                        hBoxType.getChildren().addAll(type, detail);
+                                    }
+                                    else if (fileRight.getName().endsWith(".png")) {
+                                        Text type = new Text("type: ");
+                                        type.setStyle("-fx-font-weight: bold;");
+                                        Text detail = new Text (".png");
+                                        
+                                        hBoxType.getChildren().addAll(type, detail);
+                                    }
+                                    hBoxType.setAlignment(Pos.CENTER);
+                                    
+                                    rightFrame.getChildren().addAll(scrollZoom, slider, hBoxName, hBoxDate, hBoxType);
                                     
                                     restart(stage);
                                     
@@ -319,8 +355,6 @@ public class PhotoOrganizer extends Application {
                                     Logger.getLogger(PhotoOrganizer.class.getName()).log(Level.SEVERE, null, ex);
                                 }
                                 
-                                
-                                
                             }
                         }
 
@@ -329,7 +363,7 @@ public class PhotoOrganizer extends Application {
                 hBoxFolder.getChildren().addAll(imageView, text);
                 vBoxFolder.getChildren().add(hBoxFolder);
                 
-            };
+            }
         }
         spane.setContent(vBoxFolder);
  
@@ -339,40 +373,40 @@ public class PhotoOrganizer extends Application {
         resolution(primaryStage, borderPane);
     }
     
-    public ScrollPane favourite () throws FileNotFoundException {
-        Image imageFolder = new Image(new FileInputStream("./src/photoorganizer/dir.png"));
-        PathFinder imageView = new PathFinder(imageFolder, currentLocation.listFiles()[i].getAbsolutePath());
-        Text text = new Text(currentLocation.listFiles()[i].getName());
-        imageView.setFitHeight(20);
-        imageView.setFitWidth(20);
-                
-        imageView.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-
-                if(event.getButton().equals(MouseButton.PRIMARY)){
-                    if(event.getClickCount() == 1){
-                        PathFinder path = (PathFinder) event.getSource();
-                        System.out.println(path.getDirectoryPath());
-
-                        File newFile = new File(path.getDirectoryPath());
-
-                        locationTree = newFile.getParentFile();
-                        currentLocation = newFile;
-
-                        try {
-                            restart(stage);
-                        } catch (IOException ex) {
-                            Logger.getLogger(PhotoOrganizer.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                    }
-                }
-
-            }
-        });
-        hBoxFolder.getChildren().addAll(imageView, text);
-        vBoxFolder.getChildren().add(hBoxFolder);
-    }
+//    public ScrollPane favourite () throws FileNotFoundException {
+//        Image imageFolder = new Image(new FileInputStream("./src/photoorganizer/dir.png"));
+//        PathFinder imageView = new PathFinder(imageFolder, currentLocation.listFiles()[i].getAbsolutePath());
+//        Text text = new Text(currentLocation.listFiles()[i].getName());
+//        imageView.setFitHeight(20);
+//        imageView.setFitWidth(20);
+//                
+//        imageView.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+//            @Override
+//            public void handle(MouseEvent event) {
+//
+//                if(event.getButton().equals(MouseButton.PRIMARY)){
+//                    if(event.getClickCount() == 1){
+//                        PathFinder path = (PathFinder) event.getSource();
+//                        System.out.println(path.getDirectoryPath());
+//
+//                        File newFile = new File(path.getDirectoryPath());
+//
+//                        locationTree = newFile.getParentFile();
+//                        currentLocation = newFile;
+//
+//                        try {
+//                            restart(stage);
+//                        } catch (IOException ex) {
+//                            Logger.getLogger(PhotoOrganizer.class.getName()).log(Level.SEVERE, null, ex);
+//                        }
+//                    }
+//                }
+//
+//            }
+//        });
+//        hBoxFolder.getChildren().addAll(imageView, text);
+//        vBoxFolder.getChildren().add(hBoxFolder);
+//    }
 
     /**
      * @param args the command line arguments

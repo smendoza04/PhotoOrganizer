@@ -11,6 +11,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
@@ -46,6 +47,8 @@ public class PhotoOrganizer extends Application {
     private Stage stage;
     private VBox rightFrame;
     private double size;
+    private ArrayList<File> redo = new ArrayList<File>();
+    private int index = -1;
     
     @Override
     public void start(Stage primaryStage) throws FileNotFoundException, IOException {
@@ -93,6 +96,8 @@ public class PhotoOrganizer extends Application {
                     currentLocation = locationTree;
                     locationTree = new File(locationTree.getParentFile().getAbsolutePath());
                     System.out.println("Back");
+                    redo.add(locationTree);
+                    index++;
                     try {
                         restart(stage);
                     }
@@ -109,6 +114,16 @@ public class PhotoOrganizer extends Application {
         icon = new IconGraphic(image);
         hBoxNav.getChildren().add(icon);
         
+        icon.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent e) {
+                
+                currentLocation = locationTree;
+                locationTree = redo.get(index);
+                index--;
+                
+            }
+        });
         
         
         //HBox Search Bar
@@ -148,12 +163,6 @@ public class PhotoOrganizer extends Application {
         //VBox lays out its children in vertical row
         VBox vBoxTree = new VBox();
        
-        
-        //Tree
-        Image imageRoot = new Image(new FileInputStream("./src/photoorganizer/star.png"));
-        ImageView imageViewRoot = new ImageView(imageRoot);
-        imageViewRoot.setFitHeight(20);
-        imageViewRoot.setFitWidth(20);
         
         for( int i = 0; i < locationTree.listFiles().length; i++ ){
             //HBox for folder alignment
